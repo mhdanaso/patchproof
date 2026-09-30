@@ -10,10 +10,12 @@ Welcome! Keep changes small and explain them clearly. This project is a 24-hour 
 
 ## Branches and collaboration
 
-- Keep `main` runnable and use it for the demo.
-- Create one branch per task: `feat/incident-card`, `feat/triage-api`, or `fix/demo-health-check`.
-- Pull the latest `main` before starting a task; avoid editing the same files at the same time.
-- Open a pull request and ask one teammate to review it before merging.
+- Keep `main` stable and runnable for the final demo.
+- Use `integration` as the shared branch for combining team work.
+- Create one branch per task from `integration`, such as `feat/incident-card`, `feat/triage-api`, or `fix/demo-health-check`.
+- Pull the latest `integration` before starting a task; avoid editing the same files at the same time.
+- Open a pull request into `integration` and ask one teammate to review it before merging.
+- When the combined work is ready for the final demo, merge `integration` into `main`.
 - Prefer small commits with clear messages, such as `Add sample incident endpoint`.
 
 ## Working agreement

@@ -96,7 +96,13 @@ If the evidence is incomplete or does not match that rule, the API reports the
 cause as undetermined and recommends gathering more evidence. Recommendations
 are advisory; the API does not apply changes and marks human approval as required.
 
-### Verify a proposed fix and record approval
+### Record approval and verify a proposed fix
+
+Record a human decision with `POST /api/incidents/{incident_id}/approvals`,
+using `decision` (`approved` or `rejected`), `approver`, and an optional `note`.
+`GET /api/incidents/{incident_id}/approvals` returns the approval history. An
+approval record is an audit entry only; it does not apply a recommendation.
+Verification endpoints require the latest approval to be `approved`.
 
 `POST /api/incidents/{incident_id}/verify` checks a proposed demo configuration
 against fixed rules: the application setting is supported, that setting appears
@@ -113,10 +119,29 @@ demo service. For example:
 ```
 
 Use `GET /api/incidents/{incident_id}/verifications` to view prior results.
-Record a human decision with `POST /api/incidents/{incident_id}/approvals`,
-using `decision` (`approved` or `rejected`), `approver`, and an optional `note`.
-`GET /api/incidents/{incident_id}/approvals` returns the approval history. An
-approval record is an audit entry only; it does not apply a recommendation.
+These sandbox checks are available for the seeded checkout demo only.
+
+### Record a manual service check
+
+For a custom incident, run a project-specific test or health check yourself,
+then record what happened with `POST
+/api/incidents/{incident_id}/service-check`. The latest approval must be
+`approved`. This endpoint records the result; it does not execute a command,
+call a service, or verify the result independently.
+
+Example request body:
+
+```json
+{
+  "check_name": "GET /health",
+  "outcome": "passed",
+  "note": "Returned HTTP 200 after the configuration update."
+}
+```
+
+Set `outcome` to `passed` or `failed`. `check_name` is required; `note` is
+optional. The result is included in `GET /api/incidents/{incident_id}/report`
+and the incident timeline.
 
 ### Generate an incident report
 
@@ -134,9 +159,29 @@ In a second terminal, from the repository root:
 python -m http.server 5500 --directory frontend
 ```
 
-Open <http://127.0.0.1:5500>. Choose **Start demo incident** for the guided checkout example, or choose **Report a problem** to submit a title, affected service, severity, description, and symptoms. A custom report is saved through `POST /api/incidents`; its description and symptoms are attached as evidence through `POST /api/incidents/{id}/evidence`; the dashboard then requests `POST /api/incidents/{id}/analyze` and `GET /api/incidents/{id}/report`. With `AI_API_KEY` configured, the optional model uses the supplied report and evidence to suggest a likely cause and fix. Without the key, ProofPatch gives a cautious evidence-based fallback and asks for more information rather than claiming an unsupported root cause. Review the recommendation and record approval or rejection. The deterministic verification form is only for the seeded checkout demo; for a custom incident, run a check designed for that service.
+Open <http://127.0.0.1:5500>. Choose **Start demo incident** for the guided
+checkout example, or choose **Report a problem** to submit a title, affected
+service, severity, description, and symptoms. A custom report is saved through
+`POST /api/incidents`; its description and symptoms are attached as evidence
+through `POST /api/incidents/{id}/evidence`; the dashboard then requests
+`POST /api/incidents/{id}/analyze` and `GET /api/incidents/{id}/report`. With
+`AI_API_KEY` configured, the optional model uses the supplied report and evidence
+to suggest a likely cause and fix. Without the key, ProofPatch gives a cautious
+evidence-based fallback and asks for more information rather than claiming an
+unsupported root cause. Review the recommendation and record approval or
+rejection.
 
-The incident workspace supports incident intake, seeded evidence collection, deterministic root-cause analysis, optional AI enrichment, reviewer approval/rejection, sandbox verification, and a chronological incident report. The optional AI provider is loaded from `backend/.env`:
+For a custom incident, approve the recommendation, run a project-specific test
+or health check outside ProofPatch, then record the check name, pass/fail result,
+and optional note in the **Service check** panel. The report timeline records
+that manual result. The seeded demo uses its built-in deterministic sandbox
+checks.
+
+The incident workspace supports incident intake, seeded evidence collection,
+deterministic root-cause analysis, optional AI enrichment, reviewer
+approval/rejection, seeded sandbox verification, manual service-check recording
+for custom incidents, and a chronological incident report. The optional AI
+provider is loaded from `backend/.env`:
 
 ```env
 AI_API_URL=https://openrouter.ai/api/v1/chat/completions
@@ -164,6 +209,23 @@ Open <http://127.0.0.1:8080/health>. It returns an intentional 500 until `PAYMEN
 4. **Integration and demo lead:** coordinate branches, connect the pieces, prepare the walkthrough.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for branch and review guidance.
+
+## GitHub branches and contributor credit
+
+- Keep `main` as the stable demo branch.
+- Use `integration` as the shared branch for combining and reviewing team work.
+- Create task branches from `integration`, then open pull requests into
+  `integration`. When the combined work is ready, merge `integration` into
+  `main`.
+- Merging a branch does not grant repository access. The repository owner adds
+  teammates under **Settings → Collaborators**.
+- GitHub can attribute commits in the repository's Contributors view when the
+  original author email is linked to that person's GitHub account and the
+  commit reaches the repository's default branch. Ask each teammate to commit
+  their own changes or preserve their original commit authorship. The merge
+  commit itself does not count as a contributor commit; GitHub's contributor
+  data can take up to 24 hours to refresh. See [GitHub's contributor graph
+  documentation](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-a-projects-contributors).
 
 ## Safety boundary
 
