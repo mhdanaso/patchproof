@@ -46,6 +46,12 @@ def _record_evidence(incident_id: UUID, item: EvidenceInput) -> EvidenceRecord:
     return record
 
 
+def evidence_for_incident(incident_id: UUID) -> list[EvidenceRecord]:
+    """Return a snapshot of the evidence attached to an incident."""
+    with _evidence_lock:
+        return list(_evidence_by_incident.get(incident_id, []))
+
+
 @router.post("", response_model=EvidenceRecord, status_code=status.HTTP_201_CREATED)
 def add_evidence(incident_id: UUID, payload: EvidenceInput) -> EvidenceRecord:
     """Attach a log, health-check result, change note, or other evidence."""
@@ -57,8 +63,7 @@ def add_evidence(incident_id: UUID, payload: EvidenceInput) -> EvidenceRecord:
 def list_evidence(incident_id: UUID) -> list[EvidenceRecord]:
     """List evidence collected for an incident, oldest first."""
     _require_incident(incident_id)
-    with _evidence_lock:
-        return list(_evidence_by_incident.get(incident_id, []))
+    return evidence_for_incident(incident_id)
 
 
 @router.post("/collect-demo", response_model=list[EvidenceRecord])

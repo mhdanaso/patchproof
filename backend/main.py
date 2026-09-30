@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from routes.analysis import router as analysis_router
 from routes.evidence import router as evidence_router
 from routes.incidents import router as incidents_router
 
@@ -16,6 +17,7 @@ app.add_middleware(
 )
 app.include_router(incidents_router)
 app.include_router(evidence_router)
+app.include_router(analysis_router)
 
 
 class Incident(BaseModel):

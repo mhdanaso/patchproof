@@ -85,6 +85,17 @@ Example request body for manually attaching evidence:
 }
 ```
 
+### Triage and analyze an incident
+
+Call `POST /api/incidents/{incident_id}/analyze` after collecting evidence.
+The deterministic analysis returns a triage summary, severity, evidence sources,
+a root-cause finding with confidence and supporting evidence IDs, remediation
+recommendations, and next steps. The current rule recognizes the demo's missing
+configuration setting when the application log and recent-change evidence agree.
+If the evidence is incomplete or does not match that rule, the API reports the
+cause as undetermined and recommends gathering more evidence. Recommendations
+are advisory; the API does not apply changes and marks human approval as required.
+
 ### 2. Open the dashboard
 
 In a second terminal, from the repository root:
