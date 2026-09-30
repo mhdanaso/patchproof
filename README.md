@@ -96,6 +96,36 @@ If the evidence is incomplete or does not match that rule, the API reports the
 cause as undetermined and recommends gathering more evidence. Recommendations
 are advisory; the API does not apply changes and marks human approval as required.
 
+### Verify a proposed fix and record approval
+
+`POST /api/incidents/{incident_id}/verify` checks a proposed demo configuration
+against fixed rules: the application setting is supported, that setting appears
+in the proposed configuration, and the timeout value is positive. This is a
+deterministic contract check; it does not execute submitted code or modify the
+demo service. For example:
+
+```json
+{
+  "application_setting_name": "PAYMENT_TIMEOUT_MS",
+  "configured_setting_names": ["PAYMENT_TIMEOUT_MS"],
+  "timeout_value": 30000
+}
+```
+
+Use `GET /api/incidents/{incident_id}/verifications` to view prior results.
+Record a human decision with `POST /api/incidents/{incident_id}/approvals`,
+using `decision` (`approved` or `rejected`), `approver`, and an optional `note`.
+`GET /api/incidents/{incident_id}/approvals` returns the approval history. An
+approval record is an audit entry only; it does not apply a recommendation.
+
+### Generate an incident report
+
+`GET /api/incidents/{incident_id}/report` combines the incident, collected
+evidence, latest analysis, approval history, verification history, and a
+chronological timeline. Run analysis and record any verification or approval
+first if you want those entries included. The underlying workflow records are
+in memory and reset when the API restarts.
+
 ### 2. Open the dashboard
 
 In a second terminal, from the repository root:

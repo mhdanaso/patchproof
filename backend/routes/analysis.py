@@ -2,6 +2,7 @@
 
 import re
 from datetime import datetime, timezone
+from threading import Lock
 from typing import Literal
 from uuid import UUID
 
@@ -12,6 +13,8 @@ from routes.evidence import EvidenceRecord, evidence_for_incident
 from routes.incidents import IncidentRecord, get_incident
 
 router = APIRouter(prefix="/api/incidents", tags=["triage and analysis"])
+_latest_analysis: dict[UUID, "IncidentAnalysis"] = {}
+_analysis_lock = Lock()
 
 
 class RootCauseFinding(BaseModel):
@@ -147,7 +150,7 @@ def analyze_incident(incident_id: UUID) -> IncidentAnalysis:
         f"Collected {len(evidence)} evidence item(s); "
         + ("a health-check failure is present." if health_failures else "no health-check failure was identified in the evidence.")
     )
-    return IncidentAnalysis(
+    result = IncidentAnalysis(
         incident_id=incident_id,
         analyzed_at=datetime.now(timezone.utc),
         triage_summary=triage_summary,
@@ -162,3 +165,12 @@ def analyze_incident(incident_id: UUID) -> IncidentAnalysis:
             "After an approved patch, run the sandbox health check and record the result.",
         ],
     )
+    with _analysis_lock:
+        _latest_analysis[incident_id] = result
+    return result
+
+
+def latest_analysis_for_incident(incident_id: UUID) -> IncidentAnalysis | None:
+    """Return the most recent analysis saved for an incident, if any."""
+    with _analysis_lock:
+        return _latest_analysis.get(incident_id)
