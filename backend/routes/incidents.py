@@ -61,3 +61,9 @@ def get_incident(incident_id: UUID) -> IncidentRecord:
     if incident is None:
         raise HTTPException(status_code=404, detail="Incident not found")
     return incident
+
+
+def incident_exists(incident_id: UUID) -> bool:
+    """Return whether an incident is present in the in-memory intake store."""
+    with _incidents_lock:
+        return incident_id in _incidents

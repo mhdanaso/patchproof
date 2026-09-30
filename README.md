@@ -64,6 +64,27 @@ Example:
 }
 ```
 
+### Collect incident evidence
+
+Attach a piece of evidence with `POST /api/incidents/{incident_id}/evidence`.
+Each item has a `source`, an `observation`, and optional structured `details`.
+Use `GET /api/incidents/{incident_id}/evidence` to retrieve the incident's
+evidence. For the checkout demo, `POST
+/api/incidents/{incident_id}/evidence/collect-demo` adds repeatable health-check,
+application-log, and recent-change evidence fixtures without requiring external
+services. Repeating the demo collection does not add duplicates. Evidence is
+held in memory and is cleared when the API process restarts.
+
+Example request body for manually attaching evidence:
+
+```json
+{
+  "source": "application log",
+  "observation": "KeyError: PAYMENT_TIMEOUT",
+  "details": {"file": "demo-app/app.py", "line": 13}
+}
+```
+
 ### 2. Open the dashboard
 
 In a second terminal, from the repository root:

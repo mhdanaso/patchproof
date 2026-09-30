@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from routes.evidence import router as evidence_router
 from routes.incidents import router as incidents_router
 
 app = FastAPI(title="ProofPatch API", version="0.1.0")
@@ -14,6 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(incidents_router)
+app.include_router(evidence_router)
 
 
 class Incident(BaseModel):
