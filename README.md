@@ -7,7 +7,7 @@ ProofPatch is a beginner-friendly hackathon MVP. It demonstrates one incident en
 ## MVP workflow
 
 ```text
-Demo incident → evidence → likely cause → suggested fix → verification → human review
+Demo incident → evidence → likely cause → human approval → sandbox verification → incident report
 ```
 
 The starter uses deterministic sample data, so it works without a paid model or API key. Add a free model provider only after the end-to-end demo works; keep evidence collection and verification deterministic.
@@ -134,7 +134,7 @@ In a second terminal, from the repository root:
 python -m http.server 5500 --directory frontend
 ```
 
-Open <http://127.0.0.1:5500> and choose **Load demo incident**.
+Open <http://127.0.0.1:5500> and choose **Start demo incident**. Review the evidence, enter a reviewer name, approve or reject the recommendation, and run verification after approval to finish the report.
 
 ### 3. Run the controlled failure (optional)
 
