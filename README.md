@@ -41,6 +41,29 @@ uvicorn main:app --reload
 API health: <http://127.0.0.1:8000/api/health>  
 Interactive API docs: <http://127.0.0.1:8000/docs>
 
+### Submit an incident
+
+`POST /api/incidents` accepts a JSON body with `title` and `service` required.
+Optional fields are `severity` (`low`, `medium`, `high`, or `critical`),
+`description`, `symptoms` (a list of strings), and `source` (defaults to
+`manual`). The response includes a generated incident ID, an `open` status,
+and the UTC creation time. Use `GET /api/incidents` to list incidents or
+`GET /api/incidents/{incident_id}` to retrieve one. Intake records are kept in
+memory for the lifetime of the API process.
+
+Example:
+
+```json
+{
+  "title": "Checkout returns HTTP 500",
+  "service": "demo-checkout",
+  "severity": "high",
+  "description": "Errors began after a configuration change.",
+  "symptoms": ["GET /health returned 500"],
+  "source": "demo-alert"
+}
+```
+
 ### 2. Open the dashboard
 
 In a second terminal, from the repository root:

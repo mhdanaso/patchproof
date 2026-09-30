@@ -2,7 +2,9 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from routes.incidents import router as incidents_router
 
 app = FastAPI(title="ProofPatch API", version="0.1.0")
 app.add_middleware(
@@ -11,12 +13,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(incidents_router)
 
 
 class Incident(BaseModel):
     title: str = "Checkout errors are increasing"
     service: str = "demo-checkout"
-    symptoms: list[str] = ["HTTP 500 responses", "checkout health check failing"]
+    symptoms: list[str] = Field(
+        default_factory=lambda: ["HTTP 500 responses", "checkout health check failing"]
+    )
 
 
 @app.get("/api/health")
@@ -42,8 +47,6 @@ def demo_incident():
         "verification": "Pending: run the demo check after applying a patch.",
         "approval": "Human approval required before opening a pull request.",
     }
-
-
 @app.post("/api/triage")
 def triage(incident: Incident):
     """Starter deterministic triage endpoint; an optional free LLM can be added later."""
@@ -55,3 +58,5 @@ def triage(incident: Incident):
         "root_cause": "Not determined yet. Collect logs and recent-change evidence first.",
         "next_step": "Review evidence, then propose a fix for human review.",
     }
+
+
