@@ -1,5 +1,6 @@
 /* ProofPatch frontend: plain browser JavaScript calling the FastAPI workflow. */
-const API_BASE = (window.PROOFPATCH_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const isLocalFrontend = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_BASE = (window.PROOFPATCH_API_URL || (isLocalFrontend ? 'http://127.0.0.1:8000' : '')).replace(/\/$/, '');
 const state = {
   incident: null,
   evidence: [],
