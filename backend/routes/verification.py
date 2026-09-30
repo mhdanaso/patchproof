@@ -8,7 +8,8 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from routes.incidents import incident_exists
+from routes.approvals import approval_records_for_incident
+from routes.incidents import get_incident, incident_exists
 
 router = APIRouter(prefix="/api/incidents/{incident_id}", tags=["verification"])
 
@@ -17,6 +18,12 @@ class VerificationRequest(BaseModel):
     application_setting_name: str = Field(min_length=1, max_length=100)
     configured_setting_names: list[str] = Field(max_length=30)
     timeout_value: float
+
+
+class ManualServiceCheckRequest(BaseModel):
+    check_name: str = Field(min_length=1, max_length=120)
+    outcome: Literal["passed", "failed"]
+    note: str = Field(default="", max_length=1000)
 
 
 class VerificationCheck(BaseModel):
@@ -30,7 +37,10 @@ class VerificationRecord(BaseModel):
     incident_id: UUID
     status: Literal["passed", "failed"]
     checked_at: datetime
-    application_setting_name: str
+    kind: Literal["sandbox", "manual"] = "sandbox"
+    application_setting_name: str | None = None
+    check_name: str | None = None
+    note: str = ""
     checks: list[VerificationCheck]
     summary: str
 
@@ -46,8 +56,18 @@ def verification_records_for_incident(incident_id: UUID) -> list[VerificationRec
 
 @router.post("/verify", response_model=VerificationRecord, status_code=status.HTTP_201_CREATED)
 def verify_proposed_fix(incident_id: UUID, payload: VerificationRequest) -> VerificationRecord:
-    if not incident_exists(incident_id):
-        raise HTTPException(status_code=404, detail="Incident not found")
+    incident = get_incident(incident_id)
+    if incident.source != "seeded-demo":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Automated verification is currently available for the seeded checkout demo only.",
+        )
+    approvals = approval_records_for_incident(incident_id)
+    if not approvals or approvals[-1].decision != "approved":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Record an approved human review before running verification.",
+        )
 
     allowed_names = {"PAYMENT_TIMEOUT", "PAYMENT_TIMEOUT_MS"}
     configured_names = set(payload.configured_setting_names)
@@ -82,6 +102,7 @@ def verify_proposed_fix(incident_id: UUID, payload: VerificationRequest) -> Veri
         incident_id=incident_id,
         status="passed" if passed else "failed",
         checked_at=datetime.now(timezone.utc),
+        kind="sandbox",
         application_setting_name=payload.application_setting_name,
         checks=checks,
         summary=(
@@ -89,6 +110,42 @@ def verify_proposed_fix(incident_id: UUID, payload: VerificationRequest) -> Veri
             if passed
             else "One or more deterministic sandbox checks failed."
         ),
+    )
+    with _verification_lock:
+        _verification_by_incident.setdefault(incident_id, []).append(record)
+    return record
+
+
+@router.post("/service-check", response_model=VerificationRecord, status_code=status.HTTP_201_CREATED)
+def record_manual_service_check(incident_id: UUID, payload: ManualServiceCheckRequest) -> VerificationRecord:
+    incident = get_incident(incident_id)
+    if incident.source == "seeded-demo":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Use the automated sandbox checks for the seeded checkout demo.",
+        )
+    approvals = approval_records_for_incident(incident_id)
+    if not approvals or approvals[-1].decision != "approved":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Record an approved human review before recording a service check.",
+        )
+
+    check_name = payload.check_name.strip()
+    note = payload.note.strip()
+    if not check_name:
+        raise HTTPException(status_code=422, detail="Enter the name of the check you ran.")
+    outcome_label = "passed" if payload.outcome == "passed" else "failed"
+    record = VerificationRecord(
+        id=uuid4(),
+        incident_id=incident_id,
+        status=payload.outcome,
+        checked_at=datetime.now(timezone.utc),
+        kind="manual",
+        check_name=check_name,
+        note=note,
+        checks=[],
+        summary=f"Manually recorded check {outcome_label}: {check_name}" + (f" — {note}" if note else "."),
     )
     with _verification_lock:
         _verification_by_incident.setdefault(incident_id, []).append(record)

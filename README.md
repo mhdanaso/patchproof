@@ -134,7 +134,7 @@ In a second terminal, from the repository root:
 python -m http.server 5500 --directory frontend
 ```
 
-Open <http://127.0.0.1:5500> and choose **Start demo incident**. Review the evidence, enter a reviewer name, approve or reject the recommendation, and run verification after approval to finish the report.
+Open <http://127.0.0.1:5500>. Choose **Start demo incident** for the guided checkout example, or choose **Report a problem** to submit a title, affected service, severity, description, and symptoms. A custom report is saved through `POST /api/incidents`; its description and symptoms are attached as evidence through `POST /api/incidents/{id}/evidence`; the dashboard then requests `POST /api/incidents/{id}/analyze` and `GET /api/incidents/{id}/report`. With `AI_API_KEY` configured, the optional model uses the supplied report and evidence to suggest a likely cause and fix. Without the key, ProofPatch gives a cautious evidence-based fallback and asks for more information rather than claiming an unsupported root cause. Review the recommendation and record approval or rejection. The deterministic verification form is only for the seeded checkout demo; for a custom incident, run a check designed for that service.
 
 The incident workspace supports incident intake, seeded evidence collection, deterministic root-cause analysis, optional AI enrichment, reviewer approval/rejection, sandbox verification, and a chronological incident report. The optional AI provider is loaded from `backend/.env`:
 

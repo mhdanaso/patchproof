@@ -17,18 +17,37 @@ MODEL = os.getenv("AI_MODEL", "openrouter/free")
 
 def rules_analysis(incident: dict, note: str = "") -> dict:
     evidence = incident["evidence"]
+    is_checkout_demo = incident.get("service") == "demo-checkout" and any(
+        item.get("source", "").casefold() == "application log"
+        and "PAYMENT_TIMEOUT" in item.get("observation", "")
+        for item in evidence
+    )
+    if is_checkout_demo:
+        summary = "The health check is failing and the evidence points to a renamed payment timeout setting."
+        verification_plan = [
+            "Review the proposed configuration correction with a teammate.",
+            "Request /health in the isolated demo service and confirm it returns HTTP 200.",
+        ]
+        unknowns = ["The demo does not include production telemetry or a real deployment history."]
+        confidence = 0.82
+    else:
+        summary = "The report was reviewed, but the available evidence is not enough to confirm a root cause."
+        verification_plan = [
+            "Check service logs around the time the problem began.",
+            "Compare recent deployments and configuration changes with the reported symptoms.",
+            "Test any proposed change in an isolated sandbox before applying it.",
+        ]
+        unknowns = ["No independent telemetry or recent-change record was supplied."]
+        confidence = 0.3
     return {
         "provider": "rules",
-        "summary": "The health check is failing and the evidence points to a renamed payment timeout setting.",
+        "summary": summary,
         "likely_cause": incident["root_cause"],
-        "confidence": 0.82,
+        "confidence": confidence,
         "supporting_evidence_ids": [item["id"] for item in evidence],
         "recommended_fix": incident["suggested_fix"],
-        "verification_plan": [
-            "Apply the approved configuration correction to the local demo service.",
-            "Request /health and confirm it returns HTTP 200 with status ok.",
-        ],
-        "unknowns": ["The demo does not include production telemetry or a real deployment history."],
+        "verification_plan": verification_plan,
+        "unknowns": unknowns,
         "note": note or "AI is not configured; showing the deterministic evidence-based analysis.",
     }
 

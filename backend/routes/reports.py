@@ -76,8 +76,12 @@ def get_incident_report(incident_id: UUID) -> IncidentReport:
     events.extend(
         TimelineEvent(
             occurred_at=item.checked_at,
-            kind="verification_completed",
-            summary=f"Sandbox verification {item.status}: {item.summary}",
+            kind="service_check_recorded" if item.kind == "manual" else "verification_completed",
+            summary=(
+                f"Manual service check {item.status}: {item.check_name}" + (f" — {item.note}" if item.note else "")
+                if item.kind == "manual"
+                else f"Sandbox verification {item.status}: {item.summary}"
+            ),
             reference_id=item.id,
         )
         for item in verifications
