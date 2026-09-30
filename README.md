@@ -51,6 +51,16 @@ python -m http.server 5500 --directory frontend
 
 Open <http://127.0.0.1:5500> and choose **Load demo incident**.
 
+The incident workspace supports incident intake, seeded evidence collection, deterministic root-cause analysis, optional AI enrichment, reviewer approval/rejection, sandbox verification, and a chronological incident report. The optional AI provider is loaded from `backend/.env`:
+
+```env
+AI_API_URL=https://openrouter.ai/api/v1/chat/completions
+AI_API_KEY=your_key_here
+AI_MODEL=openrouter/free
+```
+
+Restart Uvicorn after changing `.env`. The deterministic evidence analysis and workflow remain available if the provider is unavailable or returns an invalid response.
+
 ### 3. Run the controlled failure (optional)
 
 In another terminal, from the repository root:

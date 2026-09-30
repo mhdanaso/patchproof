@@ -3,16 +3,40 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ProofPatch — Incident response</title>
+    <meta name="theme-color" content="#f5f7f4" />
+    <title>ProofPatch — Incident workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <header><div class="brand-mark">P</div><div><h1>ProofPatch</h1><p>Evidence first. Verified fixes. Human approval.</p></div></header>
-      <section class="hero"><div><span class="eyebrow">INCIDENT RESPONSE</span><h2>Turn an alert into a fix you can trust.</h2><p>ProofPatch gathers evidence, explains a likely cause, and keeps a human in control of remediation.</p></div><button id="load-incident">Load demo incident</button></section>
-      <section class="card" id="incident-card"><div class="empty"><span>●</span><h3>Ready to investigate</h3><p>Load the sample incident to see the workflow.</p></div></section>
-      <footer>Demo mode · No AI key required · Fixes are suggestions until a human approves them</footer>
-    </main>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#top" aria-label="ProofPatch home"><span class="brand-icon">P</span><span>proofpatch<span class="brand-dot">.</span></span></a>
+        <div class="workspace-label">WORKSPACE</div>
+        <nav>
+          <a class="nav-link active" href="#incident"><span class="nav-icon">▦</span>Incident room</a>
+          <a class="nav-link" href="#evidence"><span class="nav-icon">⌕</span>Evidence</a>
+          <a class="nav-link" href="#report"><span class="nav-icon">▤</span>Incident report</a>
+        </nav>
+        <div class="sidebar-bottom"><div class="safe-card"><span class="safe-icon">✓</span><div><strong>Human in control</strong><p>Suggested changes are never applied automatically.</p></div></div><div class="profile"><span class="avatar">PP</span><div><strong>Demo workspace</strong><small>Hackathon environment</small></div><span class="profile-more">···</span></div></div>
+      </aside>
+
+      <main class="main-area" id="top">
+        <header class="topbar"><div class="breadcrumbs">Workspace <span>/</span> <strong>Incident room</strong></div><div class="topbar-right"><span class="connection"><i id="api-dot"></i><span id="api-status">Checking API</span></span><button class="icon-button" id="refresh-button" aria-label="Refresh incident" title="Refresh">↻</button><span class="top-avatar">N</span></div></header>
+        <div class="content">
+          <section class="page-heading"><div><div class="eyebrow"><span class="eyebrow-mark">✳</span> INCIDENT RESPONSE CENTER</div><h1>Good day. Let’s get your service healthy.</h1><p>Gather the signals, understand what changed, and verify a safe fix with a human in control.</p></div><button class="button button-primary" id="new-incident"><span>＋</span> Start demo incident</button></section>
+
+          <section class="welcome-banner" id="welcome-banner"><div class="welcome-copy"><span class="banner-kicker">YOUR INCIDENT WORKSPACE</span><h2>From first alert to verified recovery.</h2><p>Start the seeded checkout incident to see how evidence leads to a diagnosis, a reviewed fix, and deterministic checks.</p><button class="button button-light" id="banner-start">Start the walkthrough <span>→</span></button></div><div class="banner-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-core">✳</div><div class="art-chip chip-one">HEALTH CHECK <b>500</b></div><div class="art-chip chip-two">CONFIG <b>Mismatch</b></div><div class="art-chip chip-three">APPROVAL <b>Required</b></div></div></section>
+
+          <section id="incident" class="incident-area hidden" aria-live="polite"></section>
+          <section class="how-it-works" id="how-it-works"><div class="section-heading"><div><span class="eyebrow">THE PROOF PATCH FLOW</span><h2>Every recommendation has a receipt.</h2></div><span class="section-note">Evidence first. People decide. Checks prove.</span></div><div class="flow-cards"><article><span class="flow-number">01</span><span class="flow-icon icon-alert">⌁</span><h3>Collect signals</h3><p>Bring health, application log, and recent-change evidence into one incident.</p></article><article><span class="flow-number">02</span><span class="flow-icon icon-analyze">✳</span><h3>Explain the cause</h3><p>Deterministic triage shows the likely mismatch and which evidence supports it.</p></article><article><span class="flow-number">03</span><span class="flow-icon icon-review">✓</span><h3>Review the fix</h3><p>A person records approval or rejection before verification can proceed.</p></article><article><span class="flow-number">04</span><span class="flow-icon icon-verify">⌁</span><h3>Verify and report</h3><p>Fixed sandbox checks record pass or fail and create a timeline report.</p></article></div></section>
+          <footer><span class="footer-mark">P</span><span>ProofPatch <span class="footer-sep">·</span> Evidence-first incident response</span><span class="footer-right">Demo environment <i></i></span></footer>
+        </div>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
   </body>
 </html>
