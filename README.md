@@ -230,3 +230,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branch and review guidance.
 ## Safety boundary
 
 This is a demo, not a production incident-response system. Do not connect it to production credentials or let it apply changes automatically. A human must review proposed changes before any pull request or remediation action.
+
+## Team Members
+
+mhdanaso
+HariNandvv
+nihad-777
+albin8620
